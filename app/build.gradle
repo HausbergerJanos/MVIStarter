@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlin-android-extensions'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -39,7 +42,41 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // region -- Hilt --
+    def hilt_version = "2.28-alpha"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+
+    def hilt_viewmodel = "1.0.0-alpha02"
+    implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_viewmodel"
+    kapt "androidx.hilt:hilt-compiler:$hilt_viewmodel"
+    // endregion
+
+    // region -- Retrofit --
+    def retrofit_version = "2.9.0"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    // endregion
+
+    // region -- Room --
+    def room = "2.2.5"
+    implementation "androidx.room:room-runtime:$room"
+    implementation "androidx.room:room-ktx:$room"
+    kapt "androidx.room:room-compiler:$room"
+    // endregion
+
+    // region -- For view model lifecycle scope --
+    def fragment_ktx = "1.2.5"
+    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
+    // endregion
+
+    // region -- For view model instantiation --
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"
+    // endregion
+}
+
+// Need for Hilt
+kapt {
+    correctErrorTypes true
 }
