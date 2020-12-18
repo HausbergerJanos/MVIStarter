@@ -59,6 +59,10 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     // endregion
 
+    // HTTP logging interceptor
+    implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
+
     // region -- Room --
     def room = "2.2.5"
     implementation "androidx.room:room-runtime:$room"
