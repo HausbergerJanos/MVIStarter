@@ -11,10 +11,10 @@ import com.hausberger.mvistarter.framework.datasource.network.abstarction.Sample
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
 import com.hausberger.mvistarter.util.Constants.CacheSuccess.Companion.CACHE_DATA_FETCHED
 import com.hausberger.mvistarter.util.Constants.NetworkSuccess.Companion.NETWORK_DATA_FETCHED
+import com.hausberger.mvistarter.util.printLogD
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class SampleInteractor
@@ -24,15 +24,66 @@ constructor(
     private val sampleNetworkService: SampleNetworkService
 ) {
 
+    /**
+     * Fetch samples and update cache. First get data from cache. After that, get samples from network.
+     * If network fetching was successful update local database. So the steps:
+     *
+     * 1) Fetch data from [SampleCacheDataSource] and emit it immediately
+     * 2) Fetch data form [SampleNetworkService]
+     * 3) Update cache
+     * 4) Finally fetch data from [SampleCacheDataSource] with updated values and emit it
+     *
+     * @param stateEvent:   Actual [StateEvent] which behaves as a meta data about event. Contains
+     *                      information (such as event name, error info etc.)
+     *
+     * @return              a [Flow] which contains the data or error information
+     *                      wrapped into a DataState
+     */
     fun fetchSamples(
         stateEvent: StateEvent
     ): Flow<DataState<SampleViewState>?> = flow {
 
-        var cacheResult = safeCacheCall(IO) {
+        // Fetch samples from cache and wrap it into DataState<SampleViewState>
+        var cacheResponse = fetchSamplesFromCache(stateEvent)
+        // emmit immediately cached DataState
+        emit(cacheResponse)
+
+        // Fetch samples from network and wrap it into DataState<SampleViewState>
+        val apiResponse = fetchSamplesFromNetwork(stateEvent)
+        apiResponse?.stateMessage?.response?.message?.let { stateMessage ->
+            if (stateMessage == NETWORK_DATA_FETCHED) {
+                // Fetching from network was successful. Update cached data source!
+                updateSampleCache(apiResponse)
+
+                // Fetch samples from cache again. This will contains updated values too.
+                // Wrap it into DataState<SampleViewState>
+                cacheResponse = fetchSamplesFromCache(stateEvent)
+                // emmit cached DataState
+                emit(cacheResponse)
+            } else {
+                emit(apiResponse)
+            }
+        }
+    }
+
+    /**
+     * Fetch samples from [SampleCacheDataSource]. If fetching was successful wrap results into
+     * [DataState] with [CACHE_DATA_FETCHED] response message. Use [safeCacheCall] to safety handle
+     * network calling.
+     *
+     * @param stateEvent:   actual [StateEvent] which behaves as a meta data about event. Contains
+     *                      information (such as event name, error info etc.)
+     *
+     * @return              a [DataState] which contains the domain data or error information
+     */
+    private suspend fun fetchSamplesFromCache(
+        stateEvent: StateEvent
+    ): DataState<SampleViewState>? {
+        val cacheResult = safeCacheCall(IO) {
             sampleCacheDataSource.getSamples()
         }
 
-        var response = object : CacheResponseHandler<SampleViewState, List<Sample>>(
+        return object : CacheResponseHandler<SampleViewState, List<Sample>>(
             response = cacheResult,
             stateEvent = stateEvent
         ) {
@@ -50,54 +101,33 @@ constructor(
                 )
             }
         }.getResult()
+    }
 
-        emit(response)
-
+    /**
+     * Fetch samples from [SampleNetworkService]. If fetching was successful wrap results into
+     * [DataState] with [NETWORK_DATA_FETCHED] response message. Use [safeApiCall] to safety handle
+     * network calling.
+     *
+     * @param stateEvent:   actual [StateEvent] which behaves as a meta data about event. Contains
+     *                      information (such as event name, error info etc.)
+     *
+     * @return              a [DataState] which contains the domain data or error information
+     */
+    private suspend fun fetchSamplesFromNetwork(
+        stateEvent: StateEvent
+    ): DataState<SampleViewState>? {
         val apiResult = safeApiCall(IO) {
             sampleNetworkService.getSamples()
         }
 
-        val apiResponse = object : ApiResponseHandler<SampleViewState, List<Sample>>(
+        return object : ApiResponseHandler<SampleViewState, List<Sample>>(
             response = apiResult,
-                stateEvent = stateEvent
-        ) {
-            override suspend fun handleSuccess(resultObj: List<Sample>): DataState<SampleViewState>? {
-                return DataState.data(
-                        response = Response(
-                                message = NETWORK_DATA_FETCHED,
-                                uiComponentType = UIComponentType.Toast,
-                                messageType = MessageType.Success
-                        ),
-                        data = SampleViewState(
-                                samples = resultObj
-                        ),
-                        stateEvent = stateEvent
-                )
-            }
-        }.getResult()
-
-        apiResponse?.stateMessage?.response?.message?.let { message ->
-            if (message == NETWORK_DATA_FETCHED) {
-                safeCacheCall(IO) {
-                    apiResponse.data?.samples?.forEach { sample ->
-                        sampleCacheDataSource.insert(sample)
-                    }
-                }
-            }
-        }
-
-        cacheResult = safeCacheCall(IO) {
-            sampleCacheDataSource.getSamples()
-        }
-
-        response = object : CacheResponseHandler<SampleViewState, List<Sample>>(
-            response = cacheResult,
             stateEvent = stateEvent
         ) {
             override suspend fun handleSuccess(resultObj: List<Sample>): DataState<SampleViewState>? {
                 return DataState.data(
                     response = Response(
-                        message = CACHE_DATA_FETCHED,
+                        message = NETWORK_DATA_FETCHED,
                         uiComponentType = UIComponentType.Toast,
                         messageType = MessageType.Success
                     ),
@@ -108,7 +138,19 @@ constructor(
                 )
             }
         }.getResult()
+    }
 
-        emit(response)
+    /**
+     * Update [SampleCacheDataSource] with data from network.
+     *
+     * @param dataState     contains the domain data wrapped int a [DataState]. We need the "data"
+     *                      attribute
+     */
+    private suspend fun updateSampleCache(dataState: DataState<SampleViewState>) {
+        safeCacheCall(IO) {
+            dataState.data?.samples?.forEach { sample ->
+                sampleCacheDataSource.insert(sample)
+            }
+        }
     }
 }

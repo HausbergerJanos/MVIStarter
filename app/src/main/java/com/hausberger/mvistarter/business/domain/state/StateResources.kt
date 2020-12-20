@@ -1,5 +1,7 @@
 package com.hausberger.mvistarter.business.domain.state
 
+import android.view.View
+
 data class StateMessage(val response: Response)
 
 data class Response(
@@ -56,4 +58,18 @@ interface UndoCallback {
  */
 interface TodoCallback {
     fun execute()
+}
+
+interface StateMessageCallback{
+    fun removeMessageFromStack()
+}
+
+class SnackbarUndoListener
+constructor(
+    private val snackbarUndoCallback: UndoCallback?
+): View.OnClickListener {
+
+    override fun onClick(v: View?) {
+        snackbarUndoCallback?.undo()
+    }
 }

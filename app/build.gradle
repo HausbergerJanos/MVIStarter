@@ -78,6 +78,11 @@ dependencies {
     // region -- For view model instantiation --
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"
     // endregion
+
+    // region -- Material dialog --
+    def material_dialog = "3.2.1"
+    implementation "com.afollestad.material-dialogs:core:$material_dialog"
+    // endregion
 }
 
 // Need for Hilt

@@ -11,6 +11,7 @@ import com.hausberger.mvistarter.business.interactors.SampleInteractor
 import com.hausberger.mvistarter.framework.presentation.common.BaseViewModel
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleStateEvent.*
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.util.*
