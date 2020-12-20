@@ -1,4 +1,4 @@
-package com.hausberger.mvistarter.framework.presentation
+package com.hausberger.mvistarter.framework.presentation.common
 
 import com.hausberger.mvistarter.business.domain.state.Response
 import com.hausberger.mvistarter.business.domain.state.StateMessageCallback

@@ -7,9 +7,11 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
+import com.hausberger.mvistarter.framework.presentation.common.UIController
 import com.hausberger.mvistarter.framework.presentation.common.displayToast
 
-open class BaseActivity : AppCompatActivity(), UIController {
+open class BaseActivity : AppCompatActivity(),
+    UIController {
 
     private var dialogInView: MaterialDialog? = null
 

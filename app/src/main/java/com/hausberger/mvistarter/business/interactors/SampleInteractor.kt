@@ -91,7 +91,7 @@ constructor(
                 return DataState.data(
                     response = Response(
                         message = CACHE_DATA_FETCHED,
-                        uiComponentType = UIComponentType.Toast,
+                        uiComponentType = UIComponentType.None,
                         messageType = MessageType.Success
                     ),
                     data = SampleViewState(
@@ -128,7 +128,7 @@ constructor(
                 return DataState.data(
                     response = Response(
                         message = NETWORK_DATA_FETCHED,
-                        uiComponentType = UIComponentType.Toast,
+                        uiComponentType = UIComponentType.None,
                         messageType = MessageType.Success
                     ),
                     data = SampleViewState(
