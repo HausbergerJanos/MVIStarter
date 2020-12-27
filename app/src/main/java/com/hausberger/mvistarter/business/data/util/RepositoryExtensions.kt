@@ -1,14 +1,10 @@
 package com.hausberger.mvistarter.business.data.util
 
+import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.data.cache.CacheResult
 import com.hausberger.mvistarter.business.data.network.ApiResult
 import com.hausberger.mvistarter.util.Constants.CacheConstants.Companion.CACHE_TIMEOUT
-import com.hausberger.mvistarter.util.Constants.CacheErrors.Companion.CACHE_ERROR_TIMEOUT
-import com.hausberger.mvistarter.util.Constants.CacheErrors.Companion.CACHE_ERROR_UNKNOWN
-import com.hausberger.mvistarter.util.Constants.GenericErrors.Companion.ERROR_UNKNOWN
 import com.hausberger.mvistarter.util.Constants.NetworkConstants.Companion.NETWORK_TIMEOUT
-import com.hausberger.mvistarter.util.Constants.NetworkErrors.Companion.NETWORK_ERROR_TIMEOUT
-import com.hausberger.mvistarter.util.Constants.NetworkErrors.Companion.NETWORK_ERROR_UNKNOWN
 import com.hausberger.mvistarter.util.cLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
@@ -37,7 +33,10 @@ suspend fun <T> safeApiCall(
             when (throwable) {
                 is TimeoutCancellationException -> {
                     val code = 408 // timeout error code
-                    ApiResult.GenericError(code, NETWORK_ERROR_TIMEOUT)
+                    ApiResult.GenericError(
+                        code = code,
+                        errorMessageRes = R.string.network_timeout
+                    )
                 }
                 is IOException -> {
                     ApiResult.NetworkError
@@ -46,14 +45,15 @@ suspend fun <T> safeApiCall(
                     val code = throwable.code()
                     val errorResponse = convertErrorBody(throwable)
                     ApiResult.GenericError(
-                        code,
-                        errorResponse
+                        code = code,
+                        errorMessage = errorResponse,
+                        errorMessageRes = if (errorResponse.isNullOrEmpty()) R.string.network_unknown_error else null
                     )
                 }
                 else -> {
                     ApiResult.GenericError(
-                        null,
-                        NETWORK_ERROR_UNKNOWN
+                        code = null,
+                        errorMessageRes = R.string.network_unknown_error
                     )
                 }
             }
@@ -77,10 +77,10 @@ suspend fun <T> safeCacheCall(
             cLog(throwable.message)
             when (throwable) {
                 is TimeoutCancellationException -> {
-                    CacheResult.GenericError(CACHE_ERROR_TIMEOUT)
+                    CacheResult.GenericError(R.string.cache_timeout)
                 }
                 else -> {
-                    CacheResult.GenericError(CACHE_ERROR_UNKNOWN)
+                    CacheResult.GenericError(R.string.cache_unknown_error)
                 }
             }
         }
@@ -91,6 +91,6 @@ private fun convertErrorBody(throwable: HttpException): String? {
     return try {
         throwable.response()?.errorBody()?.string()
     } catch (exception: Exception) {
-        ERROR_UNKNOWN
+        ""
     }
 }

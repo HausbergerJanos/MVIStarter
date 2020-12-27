@@ -2,7 +2,7 @@ package com.hausberger.mvistarter.business.domain.state
 
 interface StateEvent {
 
-    fun errorInfo(): String
+    fun errorInfoRes(): Int
 
     fun eventName(): String
 

@@ -6,7 +6,8 @@ sealed class ApiResult<out T> {
 
     data class GenericError(
         val code: Int? = null,
-        val errorMessage: String? = null
+        val errorMessage: String? = null,
+        val errorMessageRes: Int? = null
     ) : ApiResult<Nothing>()
 
     object NetworkError : ApiResult<Nothing>()

@@ -2,7 +2,6 @@ package com.hausberger.mvistarter.business.data.cache
 
 import com.hausberger.mvistarter.business.data.cache.CacheResult.*
 import com.hausberger.mvistarter.business.domain.state.*
-import com.hausberger.mvistarter.util.Constants.CacheErrors.Companion.CACHE_DATA_NULL
 
 abstract class CacheResponseHandler<ViewState, Data>(
     private val response: CacheResult<Data?>,
@@ -11,12 +10,15 @@ abstract class CacheResponseHandler<ViewState, Data>(
 
     suspend fun getResult(): DataState<ViewState>? {
 
-        return when(response) {
+        return when (response) {
 
             is GenericError -> {
                 DataState.error(
                     response = Response(
-                        message = "${stateEvent?.errorInfo()}\n\nReason: ${response.errorMessage}",
+                        message = SimpleMessage(
+                            messageRes = stateEvent?.errorInfoRes(),
+                            descriptionRes = response.errorMessageRes
+                        ),
                         uiComponentType = UIComponentType.Dialog,
                         messageType = MessageType.Error
                     ),
@@ -28,7 +30,9 @@ abstract class CacheResponseHandler<ViewState, Data>(
                 if (response.value == null) {
                     DataState.error(
                         response = Response(
-                            message = "${stateEvent?.errorInfo()}\n\nReason: ${CACHE_DATA_NULL}.",
+                            message = SimpleMessage(
+                                messageRes = stateEvent?.errorInfoRes()
+                            ),
                             uiComponentType = UIComponentType.Dialog,
                             messageType = MessageType.Error
                         ),

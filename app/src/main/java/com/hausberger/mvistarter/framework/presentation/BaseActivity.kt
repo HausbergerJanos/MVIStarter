@@ -31,7 +31,7 @@ open class BaseActivity : AppCompatActivity(),
                 val undoCallback: UndoCallback? = response.uiComponentType.undoCallback
                 response.message?.let { msg ->
                     displaySnackbar(
-                        message = msg,
+                        message = msg.getMessageX(this),
                         snackbarUndoCallback = undoCallback,
                         onDismissCallback = onDismissCallback,
                         stateMessageCallback = stateMessageCallback
@@ -43,7 +43,7 @@ open class BaseActivity : AppCompatActivity(),
 
                 response.message?.let {
                     areYouSureDialog(
-                        message = it,
+                        message = it.getMessageX(this),
                         callback = response.uiComponentType.callback,
                         stateMessageCallback = stateMessageCallback
                     )
@@ -53,7 +53,7 @@ open class BaseActivity : AppCompatActivity(),
             is UIComponentType.Toast -> {
                 response.message?.let {
                     displayToast(
-                        message = it,
+                        message = it.getMessageX(this),
                         stateMessageCallback = stateMessageCallback
                     )
                 }
@@ -108,21 +108,21 @@ open class BaseActivity : AppCompatActivity(),
 
                 is MessageType.Error -> {
                     displayErrorDialog(
-                        message = message,
+                        message = createMessageWithReason(message),
                         stateMessageCallback = stateMessageCallback
                     )
                 }
 
                 is MessageType.Success -> {
                     displaySuccessDialog(
-                        message = message,
+                        message = message.getMessageX(this),
                         stateMessageCallback = stateMessageCallback
                     )
                 }
 
                 is MessageType.Info -> {
                     displayInfoDialog(
-                        message = message,
+                        message = message.getMessageX(this),
                         stateMessageCallback = stateMessageCallback
                     )
                 }
@@ -217,5 +217,11 @@ open class BaseActivity : AppCompatActivity(),
                 }
                 cancelable(false)
             }
+    }
+
+    private fun createMessageWithReason(
+        message: SimpleMessage
+    ): String {
+        return getString(R.string.message_with_reason, message.getMessage(this), message.getDescription(this))
     }
 }

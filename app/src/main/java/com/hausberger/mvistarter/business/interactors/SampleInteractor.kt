@@ -1,5 +1,6 @@
 package com.hausberger.mvistarter.business.interactors
 
+import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.data.cache.CacheResponseHandler
 import com.hausberger.mvistarter.business.data.cache.abstraction.SampleCacheDataSource
 import com.hausberger.mvistarter.business.data.network.ApiResponseHandler
@@ -9,11 +10,7 @@ import com.hausberger.mvistarter.business.domain.model.Sample
 import com.hausberger.mvistarter.business.domain.state.*
 import com.hausberger.mvistarter.framework.datasource.network.abstarction.SampleNetworkService
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
-import com.hausberger.mvistarter.util.Constants.CacheSuccess.Companion.CACHE_DATA_FETCHED
-import com.hausberger.mvistarter.util.Constants.NetworkSuccess.Companion.NETWORK_DATA_FETCHED
-import com.hausberger.mvistarter.util.printLogD
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
@@ -50,8 +47,8 @@ constructor(
 
         // Fetch samples from network and wrap it into DataState<SampleViewState>
         val apiResponse = fetchSamplesFromNetwork(stateEvent)
-        apiResponse?.stateMessage?.response?.message?.let { stateMessage ->
-            if (stateMessage == NETWORK_DATA_FETCHED) {
+        apiResponse?.stateMessage?.response?.message?.getMessageRes()?.let { stateMessageRes ->
+            if (stateMessageRes == R.string.network_data_fetched) {
                 // Fetching from network was successful. Update cached data source!
                 updateSampleCache(apiResponse)
 
@@ -68,7 +65,7 @@ constructor(
 
     /**
      * Fetch samples from [SampleCacheDataSource]. If fetching was successful wrap results into
-     * [DataState] with [CACHE_DATA_FETCHED] response message. Use [safeCacheCall] to safety handle
+     * [DataState] with [R.string.cached_data_fetched] response message. Use [safeCacheCall] to safety handle
      * network calling.
      *
      * @param stateEvent:   actual [StateEvent] which behaves as a meta data about event. Contains
@@ -90,7 +87,9 @@ constructor(
             override suspend fun handleSuccess(resultObj: List<Sample>): DataState<SampleViewState>? {
                 return DataState.data(
                     response = Response(
-                        message = CACHE_DATA_FETCHED,
+                        message = SimpleMessage(
+                            messageRes = R.string.cached_data_fetched
+                        ),
                         uiComponentType = UIComponentType.None,
                         messageType = MessageType.Success
                     ),
@@ -105,7 +104,7 @@ constructor(
 
     /**
      * Fetch samples from [SampleNetworkService]. If fetching was successful wrap results into
-     * [DataState] with [NETWORK_DATA_FETCHED] response message. Use [safeApiCall] to safety handle
+     * [DataState] with [R.string.network_data_fetched] response message. Use [safeApiCall] to safety handle
      * network calling.
      *
      * @param stateEvent:   actual [StateEvent] which behaves as a meta data about event. Contains
@@ -127,7 +126,9 @@ constructor(
             override suspend fun handleSuccess(resultObj: List<Sample>): DataState<SampleViewState>? {
                 return DataState.data(
                     response = Response(
-                        message = NETWORK_DATA_FETCHED,
+                        message = SimpleMessage(
+                            messageRes = R.string.network_data_fetched
+                        ),
                         uiComponentType = UIComponentType.None,
                         messageType = MessageType.Success
                     ),

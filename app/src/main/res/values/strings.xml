@@ -9,4 +9,6 @@
     <string name="text_info">Info</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="text_yes">Yes</string>
+
+    <string name="message_with_reason">%1$s\n\nReason: %2$s</string>
 </resources>

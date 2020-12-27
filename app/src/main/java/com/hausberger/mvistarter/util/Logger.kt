@@ -1,8 +1,8 @@
 package com.hausberger.mvistarter.util
 
 import android.util.Log
-import com.hausberger.mvistarter.util.Constants.Generics.Companion.DEBUG
-import com.hausberger.mvistarter.util.Constants.Generics.Companion.TAG
+import com.hausberger.mvistarter.util.Constants.AppConstants.Companion.DEBUG
+import com.hausberger.mvistarter.util.Constants.AppConstants.Companion.TAG
 
 var isUnitTest = false
 

@@ -78,6 +78,13 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         viewModel.setStateEvent(FetchSampleEvent)
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (viewModel.getMessageStackSize() > 0) {
+            viewModel.clearStateMessage()
+        }
+    }
+
     override fun onItemSelected(position: Int, item: Sample) {
         Toast.makeText(requireContext(), item.title, Toast.LENGTH_SHORT).show()
     }

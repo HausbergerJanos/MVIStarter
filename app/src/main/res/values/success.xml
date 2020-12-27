@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_data_fetched">Network data fetched</string>
+    <string name="cached_data_fetched">Cached data fetched</string>
+</resources>

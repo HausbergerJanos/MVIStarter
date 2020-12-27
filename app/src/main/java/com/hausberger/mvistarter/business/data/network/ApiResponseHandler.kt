@@ -1,8 +1,7 @@
 package com.hausberger.mvistarter.business.data.network
 
+import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
-import com.hausberger.mvistarter.util.Constants.NetworkErrors.Companion.NETWORK_DATA_NULL
-import com.hausberger.mvistarter.util.Constants.NetworkErrors.Companion.NETWORK_ERROR
 
 abstract class ApiResponseHandler<ViewState, Data>(
     private val response: ApiResult<Data?>,
@@ -16,7 +15,11 @@ abstract class ApiResponseHandler<ViewState, Data>(
             is ApiResult.GenericError -> {
                 DataState.error(
                     response = Response(
-                        message = "${stateEvent?.errorInfo()}\n\nReason: ${response.errorMessage.toString()}",
+                        message = SimpleMessage(
+                            messageRes = stateEvent?.errorInfoRes(),
+                            description = response.errorMessage,
+                            descriptionRes = response.errorMessageRes
+                        ),
                         uiComponentType = UIComponentType.Dialog,
                         messageType = MessageType.Error
                     ),
@@ -27,7 +30,10 @@ abstract class ApiResponseHandler<ViewState, Data>(
             is ApiResult.NetworkError -> {
                 DataState.error(
                     response = Response(
-                        message = "${stateEvent?.errorInfo()}\n\nReason: $NETWORK_ERROR",
+                        message = SimpleMessage(
+                            messageRes = stateEvent?.errorInfoRes(),
+                            descriptionRes = R.string.network_no_connection
+                        ),
                         uiComponentType = UIComponentType.Dialog,
                         messageType = MessageType.Error
                     ),
@@ -39,7 +45,10 @@ abstract class ApiResponseHandler<ViewState, Data>(
                 if (response.value == null) {
                     DataState.error(
                         response = Response(
-                            message = "${stateEvent?.errorInfo()}\n\nReason: ${NETWORK_DATA_NULL}.",
+                            message = SimpleMessage(
+                                messageRes = stateEvent?.errorInfoRes(),
+                                descriptionRes = R.string.network_data_null
+                            ),
                             uiComponentType = UIComponentType.Dialog,
                             messageType = MessageType.Error
                         ),

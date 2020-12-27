@@ -1,12 +1,14 @@
 package com.hausberger.mvistarter.framework.presentation.sample.state
 
+import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.StateEvent
 
 sealed class SampleStateEvent : StateEvent {
 
     object FetchSampleEvent : SampleStateEvent() {
-        override fun errorInfo(): String {
-            return "Error fetching samples."
+
+        override fun errorInfoRes(): Int {
+            return R.string.sample_error
         }
 
         override fun eventName(): String {

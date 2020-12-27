@@ -3,8 +3,8 @@ package com.hausberger.mvistarter.framework.presentation.common
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
-import com.hausberger.mvistarter.util.Constants.GenericErrors.Companion.INVALID_STATE_EVENT
 import com.hausberger.mvistarter.util.printLogD
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -57,7 +57,9 @@ abstract class BaseViewModel<ViewState> : ViewModel() {
         emit(
             DataState.error<ViewState>(
                 response = Response(
-                    message = INVALID_STATE_EVENT,
+                    message = SimpleMessage(
+                        messageRes = R.string.invalid_state_event
+                    ),
                     uiComponentType = UIComponentType.None,
                     messageType = MessageType.Error
                 ),

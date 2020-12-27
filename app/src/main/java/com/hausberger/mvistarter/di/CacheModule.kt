@@ -9,7 +9,7 @@ import com.hausberger.mvistarter.framework.datasource.cache.database.AppDatabase
 import com.hausberger.mvistarter.framework.datasource.cache.database.SampleDao
 import com.hausberger.mvistarter.framework.datasource.cache.implementation.SampleDaoServiceImpl
 import com.hausberger.mvistarter.framework.datasource.cache.mapper.SampleCacheMapper
-import com.hausberger.mvistarter.util.Constants.Generics.Companion.DATABASE_NAME
+import com.hausberger.mvistarter.util.Constants.AppConstants.Companion.DATABASE_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

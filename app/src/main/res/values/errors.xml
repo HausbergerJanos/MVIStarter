@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sample_error">Error fetching samples.</string>
+
+    <string name="invalid_state_event">Invalid state event.</string>
+
+    <string name="cache_timeout">Cache timeout</string>
+    <string name="cache_unknown_error">Unknown cache error</string>
+
+    <string name="network_timeout">Network timeout</string>
+    <string name="network_no_connection">No internet connection</string>
+    <string name="network_unknown_error">Unknown network error</string>
+    <string name="network_data_null">Network data null</string>
+</resources>
