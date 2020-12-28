@@ -26,7 +26,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     private val viewModel: SampleViewModel by viewModels()
 
-    private lateinit var sampleAdapter: SampleAdapter
+    private var sampleAdapter: SampleAdapter? = null
     private lateinit var uiController: UIController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +55,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         viewModel.viewState.observe(viewLifecycleOwner, Observer { viewState ->
             viewState?.let { sampleViewState ->
                 sampleViewState.samples?.let { sampleList ->
-                    sampleAdapter.submitList(sampleList)
+                    sampleAdapter?.submitList(sampleList)
                 }
             }
         })
@@ -137,5 +137,11 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         if (context is UIController) {
             uiController = context
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        sampleAdapter = null
     }
 }
