@@ -61,9 +61,14 @@ constructor(
         return getCurrentViewStateOrNew().layoutManager
     }
 
-    fun setLayoutManagerState(layoutManagerState: Parcelable) {
+    fun setLayoutManagerState(layoutManagerState: Parcelable?) {
         val update = getCurrentViewStateOrNew()
         update.layoutManager = layoutManagerState
         setViewState(update)
+    }
+
+    fun refresh() {
+        setLayoutManagerState(null)
+        setStateEvent(FetchSampleEvent)
     }
 }

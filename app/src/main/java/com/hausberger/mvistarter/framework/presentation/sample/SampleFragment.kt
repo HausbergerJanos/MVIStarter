@@ -38,6 +38,8 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         super.onViewCreated(view, savedInstanceState)
 
         initRecyclerView()
+        initSwipeRefresh()
+
         subscribeObservers()
 
         restoreInstanceState(savedInstanceState)
@@ -82,6 +84,13 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         sampleAdapter = SampleAdapter(this)
         sampleRecyclerView?.apply {
             adapter = sampleAdapter
+        }
+    }
+
+    private fun initSwipeRefresh() {
+        swipeRefreshLayout.setOnRefreshListener {
+            viewModel.refresh()
+            swipeRefreshLayout.isRefreshing = false
         }
     }
 
