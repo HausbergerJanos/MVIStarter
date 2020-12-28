@@ -7,5 +7,6 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class SampleViewState(
-    var samples: List<Sample>? = null
+    var samples: List<Sample>? = null,
+    var layoutManager: Parcelable? = null
 ) : ViewState, Parcelable

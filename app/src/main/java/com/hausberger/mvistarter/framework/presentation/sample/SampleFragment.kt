@@ -2,6 +2,7 @@ package com.hausberger.mvistarter.framework.presentation.sample
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -14,6 +15,8 @@ import com.hausberger.mvistarter.business.domain.state.StateMessageCallback
 import com.hausberger.mvistarter.framework.presentation.common.UIController
 import com.hausberger.mvistarter.framework.presentation.sample.SampleAdapter.*
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleStateEvent.*
+import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
+import com.hausberger.mvistarter.util.Constants.BundleKeys.Companion.SAMPLE_BUNDLE_KEY
 import com.hausberger.mvistarter.util.printLogD
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_sample.*
@@ -36,6 +39,16 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
         initRecyclerView()
         subscribeObservers()
+
+        restoreInstanceState(savedInstanceState)
+    }
+
+    private fun restoreInstanceState(savedInstanceState: Bundle?){
+        savedInstanceState?.let { inState ->
+            (inState[SAMPLE_BUNDLE_KEY] as SampleViewState?)?.let { viewState ->
+                viewModel.setViewState(viewState)
+            }
+        }
     }
 
     private fun subscribeObservers() {
@@ -48,12 +61,11 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         })
 
         viewModel.shouldDisplayProgressBar.observe(viewLifecycleOwner, Observer { shouldDisplay ->
-            printLogD("TAG-->", "on progress bar")
+
         })
 
         viewModel.stateMessage.observe(viewLifecycleOwner, Observer { stateMessage ->
             stateMessage?.let { safeStateMessage ->
-                printLogD("TAG-->", "on state message $stateMessage")
                 uiController.onResponseReceived(
                     response = safeStateMessage.response,
                     stateMessageCallback = object : StateMessageCallback {
@@ -81,9 +93,37 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     override fun onPause() {
         super.onPause()
+
         if (viewModel.getMessageStackSize() > 0) {
             viewModel.clearStateMessage()
         }
+
+        saveLayoutManagerState()
+    }
+
+    override fun restoreListPosition() {
+        viewModel.getLayoutManagerState()?.let { lmState ->
+            sampleRecyclerView?.layoutManager?.onRestoreInstanceState(lmState)
+        }
+    }
+
+    private fun saveLayoutManagerState() {
+        sampleRecyclerView.layoutManager?.onSaveInstanceState()?.let { lmState ->
+            viewModel.setLayoutManagerState(lmState)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val viewState = viewModel.viewState.value
+
+        // Clear the list. Don't want to save a large list to bundle.
+        viewState?.samples = emptyList()
+
+        outState.putParcelable(
+            SAMPLE_BUNDLE_KEY,
+            viewState
+        )
+        super.onSaveInstanceState(outState)
     }
 
     override fun onItemSelected(position: Int, item: Sample) {
