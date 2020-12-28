@@ -10,6 +10,12 @@ interface Constants {
         }
     }
 
+    interface BundleKeys {
+        companion object {
+            const val BOTTOM_NAV_BACK_STACK_KEY = "bottom_nav_back_stack_key"
+        }
+    }
+
     interface CacheConstants {
         companion object {
             const val CACHE_TIMEOUT = 6000L

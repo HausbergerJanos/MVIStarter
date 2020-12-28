@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.model.Sample
 import com.hausberger.mvistarter.business.domain.state.StateMessageCallback
@@ -87,6 +88,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     override fun onItemSelected(position: Int, item: Sample) {
         Toast.makeText(requireContext(), item.title, Toast.LENGTH_SHORT).show()
+        findNavController().navigate(R.id.action_sampleFragment_to_detailsFragment)
     }
 
     override fun onAttach(context: Context) {
