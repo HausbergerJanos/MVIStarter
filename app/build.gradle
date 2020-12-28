@@ -83,6 +83,14 @@ dependencies {
     def material_dialog = "3.2.1"
     implementation "com.afollestad.material-dialogs:core:$material_dialog"
     // endregion
+
+    // region -- JetPack navigation components --
+    def nav_components = "2.3.2"
+    implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_components"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_components"
+    implementation "androidx.navigation:navigation-runtime-ktx:$nav_components"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_components"
+    // endregion
 }
 
 // Need for Hilt

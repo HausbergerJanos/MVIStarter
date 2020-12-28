@@ -1,5 +1,6 @@
 package com.hausberger.mvistarter.framework.presentation.sample
 
+import android.os.Parcelable
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
@@ -53,6 +54,16 @@ constructor(
     private fun setSamplesListData(samples: List<Sample>) {
         val update = getCurrentViewStateOrNew()
         update.samples = samples
+        setViewState(update)
+    }
+
+    fun getLayoutManagerState(): Parcelable? {
+        return getCurrentViewStateOrNew().layoutManager
+    }
+
+    fun setLayoutManagerState(layoutManagerState: Parcelable) {
+        val update = getCurrentViewStateOrNew()
+        update.layoutManager = layoutManagerState
         setViewState(update)
     }
 }
