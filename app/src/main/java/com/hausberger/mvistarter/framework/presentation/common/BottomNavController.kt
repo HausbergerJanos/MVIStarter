@@ -3,7 +3,6 @@ package com.hausberger.mvistarter.framework.presentation.common
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.os.Parcelable
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -13,9 +12,8 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.hausberger.mvistarter.R
-import com.hausberger.mvistarter.framework.presentation.sample.SampleFragment
 import com.hausberger.mvistarter.framework.presentation.sample.SampleNavHostFragment
-import kotlinx.android.parcel.Parcelize
+import java.io.Serializable
 import java.lang.IllegalArgumentException
 
 class BottomNavController(
@@ -128,8 +126,8 @@ class BottomNavController(
         }
     }
 
-    @Parcelize
-    class BackStack : ArrayList<Int>(), Parcelable {
+    @kotlinx.serialization.Serializable
+    class BackStack : ArrayList<Int>(), Serializable {
 
         companion object {
 

@@ -4,16 +4,18 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import com.hausberger.mvistarter.R
+import com.hausberger.mvistarter.databinding.ActivityMainBinding
 import com.hausberger.mvistarter.framework.presentation.common.BottomNavController
 import com.hausberger.mvistarter.framework.presentation.common.BottomNavController.*
 import com.hausberger.mvistarter.framework.presentation.common.setUpNavigation
 import com.hausberger.mvistarter.framework.presentation.details.DetailsFragment
 import com.hausberger.mvistarter.util.Constants.BundleKeys.Companion.BOTTOM_NAV_BACK_STACK_KEY
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity(), OnNavigationGraphChanged, OnNavigationReselectedListener {
+
+    private lateinit var binding: ActivityMainBinding
 
     private val bottomNavController by lazy(LazyThreadSafetyMode.NONE) {
         BottomNavController(
@@ -26,13 +28,14 @@ class MainActivity : BaseActivity(), OnNavigationGraphChanged, OnNavigationResel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setupBottomNavigation(savedInstanceState)
     }
 
     private fun setupBottomNavigation(savedInstanceState: Bundle? = null) {
-        bottomNavigationView?.setUpNavigation(
+        binding.bottomNavigationView.setUpNavigation(
             bottomNavController = bottomNavController,
             onReselectListener = this
         )

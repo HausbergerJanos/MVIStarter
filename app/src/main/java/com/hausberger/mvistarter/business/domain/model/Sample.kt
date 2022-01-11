@@ -1,9 +1,8 @@
 package com.hausberger.mvistarter.business.domain.model
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import java.io.Serializable
 
-@Parcelize
+@kotlinx.serialization.Serializable
 data class Sample(
     val title: String
-): Parcelable
+): Serializable

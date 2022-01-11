@@ -2,7 +2,6 @@ package com.hausberger.mvistarter.framework.presentation.sample
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -12,17 +11,18 @@ import androidx.navigation.fragment.findNavController
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.model.Sample
 import com.hausberger.mvistarter.business.domain.state.StateMessageCallback
+import com.hausberger.mvistarter.databinding.FragmentSampleBinding
 import com.hausberger.mvistarter.framework.presentation.common.UIController
 import com.hausberger.mvistarter.framework.presentation.sample.SampleAdapter.*
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleStateEvent.*
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
 import com.hausberger.mvistarter.util.Constants.BundleKeys.Companion.SAMPLE_BUNDLE_KEY
-import com.hausberger.mvistarter.util.printLogD
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_sample.*
 
 @AndroidEntryPoint
 class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
+    private var currentBinding: FragmentSampleBinding? = null
+    private val binding get() = currentBinding!!
 
     private val viewModel: SampleViewModel by viewModels()
 
@@ -36,6 +36,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        currentBinding = FragmentSampleBinding.bind(view)
 
         initRecyclerView()
         initSwipeRefresh()
@@ -82,15 +83,15 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     private fun initRecyclerView() {
         sampleAdapter = SampleAdapter(this)
-        sampleRecyclerView?.apply {
+        binding.sampleRecyclerView.apply {
             adapter = sampleAdapter
         }
     }
 
     private fun initSwipeRefresh() {
-        swipeRefreshLayout.setOnRefreshListener {
+        binding.swipeRefreshLayout.setOnRefreshListener {
             viewModel.refresh()
-            swipeRefreshLayout.isRefreshing = false
+            binding.swipeRefreshLayout.isRefreshing = false
         }
     }
 
@@ -112,12 +113,12 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     override fun restoreListPosition() {
         viewModel.getLayoutManagerState()?.let { lmState ->
-            sampleRecyclerView?.layoutManager?.onRestoreInstanceState(lmState)
+            binding.sampleRecyclerView.layoutManager?.onRestoreInstanceState(lmState)
         }
     }
 
     private fun saveLayoutManagerState() {
-        sampleRecyclerView.layoutManager?.onSaveInstanceState()?.let { lmState ->
+        binding.sampleRecyclerView.layoutManager?.onSaveInstanceState()?.let { lmState ->
             viewModel.setLayoutManagerState(lmState)
         }
     }
@@ -128,7 +129,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         // Clear the list. Don't want to save a large list to bundle.
         viewState?.samples = emptyList()
 
-        outState.putParcelable(
+        outState.putSerializable(
             SAMPLE_BUNDLE_KEY,
             viewState
         )
@@ -150,7 +151,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         sampleAdapter = null
+        currentBinding = null
     }
 }

@@ -1,17 +1,16 @@
 package com.hausberger.mvistarter.framework.presentation.sample
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.hausberger.mvistarter.business.domain.model.Sample
-import kotlinx.android.synthetic.main.view_sample_item.view.*
+import com.hausberger.mvistarter.databinding.ViewSampleItemBinding
 
 class SampleItemView
 constructor(
-    itemView: View,
+    private val binding: ViewSampleItemBinding,
     private val interaction: SampleAdapter.Interaction?
-) : RecyclerView.ViewHolder(itemView) {
+) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(item: Sample) = with(itemView) {
+    fun bind(item: Sample) = with(binding) {
         title.text = item.title
 
         itemView.setOnClickListener {

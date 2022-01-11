@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id 'kotlin-android-extensions'
+    id 'kotlinx-serialization'
     id 'dagger.hilt.android.plugin'
 }
 
@@ -26,10 +26,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildFeatures {
+        viewBinding true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -49,6 +55,11 @@ dependencies {
 
     def appcompat = "1.4.0"
     implementation "androidx.appcompat:appcompat:$appcompat"
+    // endregion
+
+    // region -- Kotlin serialization --
+    def serialization_json_version = "1.2.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_json_version"
     // endregion
 
     // Pull to refresh

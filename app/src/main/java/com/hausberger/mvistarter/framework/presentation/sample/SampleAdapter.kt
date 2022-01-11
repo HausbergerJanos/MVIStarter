@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.model.Sample
+import com.hausberger.mvistarter.databinding.ViewSampleItemBinding
 
 class SampleAdapter(private val interaction: Interaction? = null) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -27,13 +28,14 @@ class SampleAdapter(private val interaction: Interaction? = null) :
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val binding = ViewSampleItemBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
 
         return SampleItemView(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.view_sample_item,
-                parent,
-                false
-            ),
+            binding,
             interaction
         )
     }
