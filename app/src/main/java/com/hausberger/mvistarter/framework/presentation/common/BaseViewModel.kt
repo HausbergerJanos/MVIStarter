@@ -6,22 +6,19 @@ import androidx.lifecycle.ViewModel
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
 import com.hausberger.mvistarter.util.printLogD
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 
 abstract class BaseViewModel<ViewState> : ViewModel() {
 
-    private val _viewState: MutableLiveData<ViewState> = MutableLiveData()
+    private val _viewState by lazy { MutableStateFlow(initNewViewState()) }
+    val viewState = _viewState.asStateFlow()
 
-    val dataChannelManager: DataChannelManager<ViewState> =
+    private val dataChannelManager: DataChannelManager<ViewState> =
         object : DataChannelManager<ViewState>() {
             override fun handleNewData(data: ViewState) {
                 this@BaseViewModel.handleNewData(data)
             }
         }
-
-    val viewState: LiveData<ViewState>
-        get() = _viewState
 
     val shouldDisplayProgressBar: LiveData<Boolean> = dataChannelManager.shouldDisplayProgressBar
 
@@ -33,7 +30,7 @@ abstract class BaseViewModel<ViewState> : ViewModel() {
         return dataChannelManager.messageStack.size
     }
 
-    fun setupChannel() = dataChannelManager.setupChannel()
+    //fun setupChannel() = dataChannelManager.setupChannel()
 
     abstract fun handleNewData(data: ViewState)
 

@@ -1,5 +1,6 @@
 package com.hausberger.mvistarter.business.interactors
 
+import android.util.Log
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.data.cache.CacheResponseHandler
 import com.hausberger.mvistarter.business.data.cache.abstraction.SampleCacheDataSource
@@ -11,6 +12,7 @@ import com.hausberger.mvistarter.business.domain.state.*
 import com.hausberger.mvistarter.framework.datasource.network.abstarction.SampleNetworkService
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 

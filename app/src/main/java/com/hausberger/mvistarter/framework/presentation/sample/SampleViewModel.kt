@@ -1,6 +1,5 @@
 package com.hausberger.mvistarter.framework.presentation.sample
 
-import android.os.Parcelable
 import com.hausberger.mvistarter.business.domain.model.Sample
 import com.hausberger.mvistarter.business.domain.state.DataState
 import com.hausberger.mvistarter.business.domain.state.StateEvent
@@ -20,7 +19,6 @@ constructor(
 ) : BaseViewModel<SampleViewState>() {
 
     override fun handleNewData(data: SampleViewState) {
-
         data.let { viewState ->
             viewState.samples?.let { sampleList ->
                 setSamplesListData(sampleList)
@@ -47,23 +45,13 @@ constructor(
     }
 
     private fun setSamplesListData(samples: List<Sample>) {
-        val update = getCurrentViewStateOrNew()
-        update.samples = samples
-        setViewState(update)
-    }
-
-    fun getLayoutManagerState(): Parcelable? {
-        return getCurrentViewStateOrNew().layoutManager
-    }
-
-    fun setLayoutManagerState(layoutManagerState: Parcelable?) {
-        val update = getCurrentViewStateOrNew()
-        update.layoutManager = layoutManagerState
+        val update = getCurrentViewStateOrNew().copy(
+            samples = samples
+        )
         setViewState(update)
     }
 
     fun refresh() {
-        setLayoutManagerState(null)
         setStateEvent(FetchSampleEvent)
     }
 }

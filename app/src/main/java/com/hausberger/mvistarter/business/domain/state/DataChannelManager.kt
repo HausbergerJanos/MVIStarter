@@ -1,36 +1,29 @@
 package com.hausberger.mvistarter.business.domain.state
 
-import com.hausberger.mvistarter.util.printLogD
+import android.util.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 
 abstract class DataChannelManager<ViewState> {
 
-    private val dataChannel = BroadcastChannel<DataState<ViewState>>(Channel.BUFFERED)
+    private val dataChannel = MutableSharedFlow<DataState<ViewState>>(extraBufferCapacity = 10)
+    private var job: Job
+
     private var channelScope: CoroutineScope? = null
     private val stateEventManager: StateEventManager = StateEventManager()
 
     val messageStack = MessageStack()
     val shouldDisplayProgressBar = stateEventManager.shouldDisplayProgressBar
 
-    fun setupChannel() {
-        cancelJobs()
-        initChannel()
-    }
-
-    private fun initChannel() {
-        dataChannel
-            .asFlow()
+    init {
+        Log.d("FLOW_MANAGER-->", "setup channel")
+        job = dataChannel
             .onEach { dataState ->
                 withContext(Main) {
-                    dataState.data?.let { data ->
-                        handleNewData(data)
+                    dataState.data?.let { viewState ->
+                        Log.d("FLOW_MANAGER-->", "Handle new data in FlowManager")
+                        handleNewData(viewState)
                     }
                     dataState.stateMessage?.let { stateMessage ->
                         handleNewStateMessage(stateMessage)
@@ -43,16 +36,17 @@ abstract class DataChannelManager<ViewState> {
             .launchIn(getChannelScope())
     }
 
-    fun launchJob(
+    fun launchJob (
         stateEvent: StateEvent,
-        jobFunction: Flow<DataState<ViewState>?>
+        dataStateFlow: Flow<DataState<ViewState>?>
     ) {
         if (!isStateEventActive(stateEvent)) {
-            printLogD("DCM", "launching job: ${stateEvent.eventName()}")
+            println("CHANNEL--> Launching job: ${stateEvent.eventName()}")
             addStateEvent(stateEvent)
-            jobFunction
+            dataStateFlow
                 .onEach { dataState ->
                     dataState?.let { safeDataState ->
+                        Log.d("FLOW_MANAGER-->", "Offer data in FlowManager")
                         offerToDataChannel(safeDataState)
                     }
                 }
@@ -62,9 +56,7 @@ abstract class DataChannelManager<ViewState> {
 
     private fun offerToDataChannel(dataState: DataState<ViewState>) {
         dataChannel.apply {
-            if (!isClosedForSend) {
-                offer(dataState)
-            }
+            tryEmit(dataState)
         }
     }
 
@@ -80,12 +72,12 @@ abstract class DataChannelManager<ViewState> {
 
     fun removeStateEvent(stateEvent: StateEvent?) = stateEventManager.removeStateEvent(stateEvent)
 
+    private fun addStateEvent(stateEvent: StateEvent) = stateEventManager.addStateEvent(stateEvent)
+
     private fun isStateEventActive(stateEvent: StateEvent) =
         stateEventManager.isStateEventActive(stateEvent)
 
-    private fun addStateEvent(stateEvent: StateEvent) = stateEventManager.addStateEvent(stateEvent)
-
-    fun getChannelScope(): CoroutineScope {
+    private fun getChannelScope(): CoroutineScope {
         return channelScope ?: setupNewChannelScope(CoroutineScope(Dispatchers.IO))
     }
 
@@ -94,26 +86,27 @@ abstract class DataChannelManager<ViewState> {
         return channelScope as CoroutineScope
     }
 
-
     private fun isMessageStackEmpty(): Boolean {
         return messageStack.isStackEmpty()
     }
 
     fun clearStateMessage(index: Int = 0) = messageStack.removeAt(index)
 
-    fun clearAllStateMessages() = messageStack.clear()
-
-    fun printStateMessages() {
-        for (message in messageStack) {
-            printLogD("DCM", "${message.response.message}")
-        }
-    }
-
     // for debugging
     fun getActiveJobs() = stateEventManager.getActiveJobNames()
 
     fun isJobAlreadyActive(stateEvent: StateEvent): Boolean {
         return isStateEventActive(stateEvent)
+    }
+
+    fun clearActiveStateEventCounter() = stateEventManager.clearActiveStateEventCounter()
+
+    fun clearAllStateMessages() = messageStack.clear()
+
+    fun printStateMessages() {
+        for (message in messageStack) {
+            println("${message.response.message}")
+        }
     }
 
     fun cancelJobs() {
@@ -127,6 +120,4 @@ abstract class DataChannelManager<ViewState> {
 
         clearActiveStateEventCounter()
     }
-
-    fun clearActiveStateEventCounter() = stateEventManager.clearActiveStateEventCounter()
 }

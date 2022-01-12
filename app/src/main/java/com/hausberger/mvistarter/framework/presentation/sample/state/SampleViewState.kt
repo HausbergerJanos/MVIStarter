@@ -7,6 +7,5 @@ import java.io.Serializable
 
 @kotlinx.serialization.Serializable
 data class SampleViewState(
-    var samples: List<Sample>? = null,
-    var layoutManager: Parcelable? = null
+    var samples: List<Sample>? = null
 ) : ViewState, Serializable
