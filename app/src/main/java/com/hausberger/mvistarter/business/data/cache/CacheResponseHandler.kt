@@ -9,15 +9,13 @@ abstract class CacheResponseHandler<ViewState, Data>(
 ) {
 
     suspend fun getResult(): DataState<ViewState>? {
-
         return when (response) {
-
             is GenericError -> {
                 DataState.error(
                     response = Response(
                         message = SimpleMessage(
+                            messageCode = response.code,
                             messageRes = stateEvent?.errorInfoRes(),
-                            descriptionRes = response.errorMessageRes
                         ),
                         uiComponentType = UIComponentType.Dialog,
                         messageType = MessageType.Error

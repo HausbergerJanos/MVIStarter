@@ -1,9 +1,16 @@
 package com.hausberger.mvistarter.business.data.util
 
+import com.google.gson.Gson
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.data.cache.CacheResult
 import com.hausberger.mvistarter.business.data.network.ApiResult
+import com.hausberger.mvistarter.framework.datasource.network.model.SampleApiError
+import com.hausberger.mvistarter.util.Constants
 import com.hausberger.mvistarter.util.Constants.CacheConstants.Companion.CACHE_TIMEOUT
+import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.CACHE_TIMEOUT_ERROR
+import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.CACHE_UNKNOWN_ERROR
+import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_TIMEOUT_ERROR
+import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_UNKNOWN_ERROR
 import com.hausberger.mvistarter.util.Constants.NetworkConstants.Companion.NETWORK_TIMEOUT
 import com.hausberger.mvistarter.util.cLog
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,7 +27,6 @@ suspend fun <T> safeApiCall(
     dispatcher: CoroutineDispatcher,
     apiCall: suspend () -> T?
 ): ApiResult<T?> {
-
     return withContext(dispatcher) {
         try {
             // throws TimeoutCancellationException
@@ -32,10 +38,10 @@ suspend fun <T> safeApiCall(
             cLog(throwable.message)
             when (throwable) {
                 is TimeoutCancellationException -> {
-                    val code = 408 // timeout error code
+                    val code =
+                        Constants.ErrorType.NETWORK_TIMEOUT_ERROR // timeout error code
                     ApiResult.GenericError(
-                        code = code,
-                        errorMessageRes = R.string.network_timeout
+                        code = code
                     )
                 }
                 is IOException -> {
@@ -46,14 +52,12 @@ suspend fun <T> safeApiCall(
                     val errorResponse = convertErrorBody(throwable)
                     ApiResult.GenericError(
                         code = code,
-                        errorMessage = errorResponse,
-                        errorMessageRes = if (errorResponse.isNullOrEmpty()) R.string.network_unknown_error else null
+                        errorMessage = errorResponse
                     )
                 }
                 else -> {
                     ApiResult.GenericError(
-                        code = null,
-                        errorMessageRes = R.string.network_unknown_error
+                        code = NETWORK_UNKNOWN_ERROR
                     )
                 }
             }
@@ -65,7 +69,6 @@ suspend fun <T> safeCacheCall(
     dispatcher: CoroutineDispatcher,
     cacheCall: suspend () -> T?
 ) : CacheResult<T?> {
-
     return withContext(dispatcher) {
         try {
             // throws TimeoutCancellationException
@@ -77,10 +80,14 @@ suspend fun <T> safeCacheCall(
             cLog(throwable.message)
             when (throwable) {
                 is TimeoutCancellationException -> {
-                    CacheResult.GenericError(R.string.cache_timeout)
+                    CacheResult.GenericError(
+                        code = CACHE_TIMEOUT_ERROR
+                    )
                 }
                 else -> {
-                    CacheResult.GenericError(R.string.cache_unknown_error)
+                    CacheResult.GenericError(
+                        code = CACHE_UNKNOWN_ERROR
+                    )
                 }
             }
         }
@@ -88,9 +95,26 @@ suspend fun <T> safeCacheCall(
 }
 
 private fun convertErrorBody(throwable: HttpException): String? {
-    return try {
-        throwable.response()?.errorBody()?.string()
-    } catch (exception: Exception) {
-        ""
+    var body: String? = ""
+    try {
+        body = throwable.response()?.errorBody()?.string()
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
+
+    return try {
+        val gson = Gson()
+        val adapter = gson.getAdapter(SampleApiError::class.java)
+        val apiError = adapter.fromJson(body)
+        apiError.message
+    } catch (e: Exception) {
+        e.printStackTrace()
+        body
+    }
+
+//    return try {
+//        throwable.response()?.errorBody()?.string()
+//    } catch (exception: Exception) {
+//        ""
+//    }
 }

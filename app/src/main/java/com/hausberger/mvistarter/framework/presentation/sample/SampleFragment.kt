@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.model.Sample
+import com.hausberger.mvistarter.business.domain.state.MessageType
 import com.hausberger.mvistarter.business.domain.state.StateMessageCallback
 import com.hausberger.mvistarter.databinding.FragmentSampleBinding
 import com.hausberger.mvistarter.framework.presentation.common.UIController
@@ -71,18 +72,20 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
         })
 
-        viewModel.stateMessage.observe(viewLifecycleOwner, Observer { stateMessage ->
-            stateMessage?.let { safeStateMessage ->
-                uiController.onResponseReceived(
-                    response = safeStateMessage.response,
-                    stateMessageCallback = object : StateMessageCallback {
-                        override fun removeMessageFromStack() {
-                            viewModel.clearStateMessage()
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.stateMessage.collect { stateMessage ->
+                stateMessage?.let {
+                    uiController.onResponseReceived(
+                        response = stateMessage.response,
+                        stateMessageCallback = object : StateMessageCallback {
+                            override fun removeMessageFromStack() {
+                                viewModel.clearStateMessage()
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
-        })
+        }
     }
 
     private fun initRecyclerView() {
@@ -102,6 +105,7 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
     override fun onResume() {
         super.onResume()
         viewModel.setStateEvent(FetchSampleEvent)
+        viewModel.setStateEvent(FetchSampleEvent2)
     }
 
     override fun onPause() {

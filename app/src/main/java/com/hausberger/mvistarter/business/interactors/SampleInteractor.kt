@@ -1,6 +1,5 @@
 package com.hausberger.mvistarter.business.interactors
 
-import android.util.Log
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.data.cache.CacheResponseHandler
 import com.hausberger.mvistarter.business.data.cache.abstraction.SampleCacheDataSource
@@ -9,11 +8,12 @@ import com.hausberger.mvistarter.business.data.util.safeApiCall
 import com.hausberger.mvistarter.business.data.util.safeCacheCall
 import com.hausberger.mvistarter.business.domain.model.Sample
 import com.hausberger.mvistarter.business.domain.state.*
+import com.hausberger.mvistarter.business.domain.state.MessageType.*
 import com.hausberger.mvistarter.framework.datasource.network.abstarction.SampleNetworkService
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import java.lang.AssertionError
 import javax.inject.Inject
 
 class SampleInteractor
@@ -49,11 +49,10 @@ constructor(
 
         // Fetch samples from network and wrap it into DataState<SampleViewState>
         val apiResponse = fetchSamplesFromNetwork(stateEvent)
-        apiResponse?.stateMessage?.response?.message?.getMessageRes()?.let { stateMessageRes ->
-            if (stateMessageRes == R.string.network_data_fetched) {
+        apiResponse?.stateMessage?.response?.messageType?.let { stateMessageType ->
+            if (stateMessageType == Success) {
                 // Fetching from network was successful. Update cached data source!
                 updateSampleCache(apiResponse)
-
                 // Fetch samples from cache again. This will contains updated values too.
                 // Wrap it into DataState<SampleViewState>
                 cacheResponse = fetchSamplesFromCache(stateEvent)
@@ -93,7 +92,7 @@ constructor(
                             messageRes = R.string.cached_data_fetched
                         ),
                         uiComponentType = UIComponentType.None,
-                        messageType = MessageType.Success
+                        messageType = Success
                     ),
                     data = SampleViewState(
                         samples = resultObj
@@ -132,7 +131,7 @@ constructor(
                             messageRes = R.string.network_data_fetched
                         ),
                         uiComponentType = UIComponentType.None,
-                        messageType = MessageType.Success
+                        messageType = Success
                     ),
                     data = SampleViewState(
                         samples = resultObj

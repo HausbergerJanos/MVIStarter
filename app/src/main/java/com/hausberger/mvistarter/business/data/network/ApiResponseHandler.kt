@@ -1,7 +1,10 @@
 package com.hausberger.mvistarter.business.data.network
 
-import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
+import com.hausberger.mvistarter.business.domain.state.MessageType.*
+import com.hausberger.mvistarter.business.domain.state.UIComponentType.*
+import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_DATA_NULL_ERROR
+import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_NO_CONNECTION_ERROR
 
 abstract class ApiResponseHandler<ViewState, Data>(
     private val response: ApiResult<Data?>,
@@ -9,19 +12,17 @@ abstract class ApiResponseHandler<ViewState, Data>(
 ) {
 
     suspend fun getResult(): DataState<ViewState>? {
-
         return when (response) {
-
             is ApiResult.GenericError -> {
                 DataState.error(
                     response = Response(
                         message = SimpleMessage(
+                            messageCode = response.code,
                             messageRes = stateEvent?.errorInfoRes(),
-                            description = response.errorMessage,
-                            descriptionRes = response.errorMessageRes
+                            description = response.errorMessage
                         ),
-                        uiComponentType = UIComponentType.Dialog,
-                        messageType = MessageType.Error
+                        uiComponentType = Dialog,
+                        messageType = Error
                     ),
                     stateEvent = stateEvent
                 )
@@ -31,11 +32,11 @@ abstract class ApiResponseHandler<ViewState, Data>(
                 DataState.error(
                     response = Response(
                         message = SimpleMessage(
-                            messageRes = stateEvent?.errorInfoRes(),
-                            descriptionRes = R.string.network_no_connection
+                            messageCode = NETWORK_NO_CONNECTION_ERROR,
+                            messageRes = stateEvent?.errorInfoRes()
                         ),
-                        uiComponentType = UIComponentType.Dialog,
-                        messageType = MessageType.Error
+                        uiComponentType = Dialog,
+                        messageType = Error
                     ),
                     stateEvent = stateEvent
                 )
@@ -46,11 +47,11 @@ abstract class ApiResponseHandler<ViewState, Data>(
                     DataState.error(
                         response = Response(
                             message = SimpleMessage(
-                                messageRes = stateEvent?.errorInfoRes(),
-                                descriptionRes = R.string.network_data_null
+                                messageCode = NETWORK_DATA_NULL_ERROR,
+                                messageRes = stateEvent?.errorInfoRes()
                             ),
-                            uiComponentType = UIComponentType.Dialog,
-                            messageType = MessageType.Error
+                            uiComponentType = Dialog,
+                            messageType = Error
                         ),
                         stateEvent = stateEvent
                     )
@@ -58,7 +59,6 @@ abstract class ApiResponseHandler<ViewState, Data>(
                     handleSuccess(resultObj = response.value)
                 }
             }
-
         }
     }
 

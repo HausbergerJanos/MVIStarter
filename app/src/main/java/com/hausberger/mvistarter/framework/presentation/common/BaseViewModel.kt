@@ -22,7 +22,7 @@ abstract class BaseViewModel<ViewState> : ViewModel() {
 
     val shouldDisplayProgressBar: LiveData<Boolean> = dataChannelManager.shouldDisplayProgressBar
 
-    val stateMessage: LiveData<StateMessage?>
+    val stateMessage: StateFlow<StateMessage?>
         get() = dataChannelManager.messageStack.stateMessage
 
     // FOR DEBUGGING

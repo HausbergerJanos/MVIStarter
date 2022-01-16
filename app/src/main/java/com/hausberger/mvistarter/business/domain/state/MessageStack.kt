@@ -1,15 +1,13 @@
 package com.hausberger.mvistarter.business.domain.state
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.hausberger.mvistarter.util.printLogD
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class MessageStack : ArrayList<StateMessage>() {
 
-    private val _stateMessage: MutableLiveData<StateMessage?> = MutableLiveData()
-
-    val stateMessage: LiveData<StateMessage?>
-        get() = _stateMessage
+    private val _stateMessage: MutableStateFlow<StateMessage?> = MutableStateFlow(null)
+    val stateMessage = _stateMessage.asStateFlow()
 
     fun isStackEmpty(): Boolean = size == 0
 
@@ -60,6 +58,12 @@ class MessageStack : ArrayList<StateMessage>() {
     }
 
     private fun setStateMessage(stateMessage: StateMessage?) {
-        _stateMessage.value = stateMessage
+        stateMessage?.let {
+            _stateMessage.value = _stateMessage.value?.copy(
+                response = it.response
+            )
+        }
+
+        _stateMessage.value =  stateMessage
     }
 }

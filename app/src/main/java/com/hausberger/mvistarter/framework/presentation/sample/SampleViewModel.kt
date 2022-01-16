@@ -32,6 +32,10 @@ constructor(
                 sampleInteractor.fetchSamples(stateEvent)
             }
 
+            is FetchSampleEvent2 -> {
+                sampleInteractor.fetchSamples(stateEvent)
+            }
+
             else -> {
                 emitInvalidStateEvent(stateEvent)
             }

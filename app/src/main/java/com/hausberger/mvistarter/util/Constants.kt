@@ -31,4 +31,16 @@ interface Constants {
             const val NETWORK_TIMEOUT = 6000L
         }
     }
+
+    interface ErrorType {
+        companion object {
+            const val CACHE_TIMEOUT_ERROR = 300
+            const val CACHE_UNKNOWN_ERROR = 301
+
+            const val NETWORK_TIMEOUT_ERROR = 408
+            const val NETWORK_UNKNOWN_ERROR = 430
+            const val NETWORK_NO_CONNECTION_ERROR = 450
+            const val NETWORK_DATA_NULL_ERROR = 451
+        }
+    }
 }
