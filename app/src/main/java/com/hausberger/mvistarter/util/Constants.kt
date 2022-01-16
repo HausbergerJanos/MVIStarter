@@ -34,6 +34,8 @@ interface Constants {
 
     interface ErrorType {
         companion object {
+            const val UNDEFINED_ERROR_CODE = -1
+
             const val CACHE_TIMEOUT_ERROR = 300
             const val CACHE_UNKNOWN_ERROR = 301
 

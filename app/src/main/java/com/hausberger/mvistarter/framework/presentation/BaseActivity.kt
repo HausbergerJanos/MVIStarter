@@ -6,17 +6,21 @@ import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
 import com.hausberger.mvistarter.framework.presentation.common.UIController
+import com.hausberger.mvistarter.framework.presentation.common.error.ErrorManager
 import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.CACHE_TIMEOUT_ERROR
 import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.CACHE_UNKNOWN_ERROR
 import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_DATA_NULL_ERROR
 import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_NO_CONNECTION_ERROR
 import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_TIMEOUT_ERROR
 import com.hausberger.mvistarter.util.Constants.ErrorType.Companion.NETWORK_UNKNOWN_ERROR
+import javax.inject.Inject
 
-open class BaseActivity : AppCompatActivity(),
-    UIController {
+open class BaseActivity : AppCompatActivity(), UIController {
 
     private var dialogInView: MaterialDialog? = null
+
+    @Inject
+    lateinit var errorManager: ErrorManager
 
     override fun onPause() {
         super.onPause()
@@ -108,7 +112,7 @@ open class BaseActivity : AppCompatActivity(),
             dialogInView = when (response.messageType) {
                 is MessageType.Error -> {
                     displayErrorDialog(
-                        message = createMessageWithReason(message),
+                        message = errorManager.getError(this, message),
                         stateMessageCallback = stateMessageCallback
                     )
                 }
@@ -224,46 +228,4 @@ open class BaseActivity : AppCompatActivity(),
 //    ): String {
 //        return getString(R.string.message_with_reason, message.getMessage(this), message.getDescription(this))
 //    }
-
-    // TODO - Remove
-    private fun createMessageWithReason(
-        message: SimpleMessage
-    ): String {
-        var errorMessage = ""
-        message.messageRes?.let {
-            errorMessage = getString(it)
-        }
-
-        message.messageCode?.let {
-            when (it) {
-                NETWORK_TIMEOUT_ERROR -> {
-                    errorMessage = "$errorMessage\n\nTime out"
-                }
-                NETWORK_NO_CONNECTION_ERROR -> {
-                    errorMessage = "$errorMessage\n\nNo Internet connection"
-                }
-                NETWORK_DATA_NULL_ERROR -> {
-                    errorMessage = "$errorMessage\n\nNetwork data null"
-                }
-                NETWORK_UNKNOWN_ERROR -> {
-                    errorMessage = "$errorMessage\n\nBla Bla Bla"
-                }
-
-                CACHE_TIMEOUT_ERROR -> {
-                    errorMessage = "$errorMessage\n\nTime out Cache"
-                }
-                CACHE_UNKNOWN_ERROR -> {
-                    errorMessage = "$errorMessage\n\nBla Bla Bla Cache"
-                }
-            }
-        }
-
-        message.description?.let { description ->
-            if (description.isNotEmpty()) {
-                errorMessage = "$errorMessage\n\n$description"
-            }
-        }
-
-        return errorMessage
-    }
 }
