@@ -2,7 +2,6 @@ package com.hausberger.mvistarter.framework.presentation.sample
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -12,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.model.Sample
-import com.hausberger.mvistarter.business.domain.state.MessageType
 import com.hausberger.mvistarter.business.domain.state.StateMessageCallback
 import com.hausberger.mvistarter.databinding.FragmentSampleBinding
 import com.hausberger.mvistarter.framework.presentation.common.UIController
@@ -21,7 +19,6 @@ import com.hausberger.mvistarter.framework.presentation.sample.state.SampleState
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
 import com.hausberger.mvistarter.util.Constants.BundleKeys.Companion.SAMPLE_BUNDLE_KEY
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -105,7 +102,6 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
     override fun onResume() {
         super.onResume()
         viewModel.setStateEvent(FetchSampleEvent)
-        viewModel.setStateEvent(FetchSampleEvent2)
     }
 
     override fun onPause() {

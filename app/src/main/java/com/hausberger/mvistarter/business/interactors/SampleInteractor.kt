@@ -91,7 +91,7 @@ constructor(
                         message = SimpleMessage(
                             messageRes = R.string.cached_data_fetched
                         ),
-                        uiComponentType = UIComponentType.None,
+                        uiComponentType = UIComponentType.Toast,
                         messageType = Success
                     ),
                     data = SampleViewState(

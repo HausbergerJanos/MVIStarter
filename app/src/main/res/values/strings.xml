@@ -5,6 +5,7 @@
     <string name="text_error">Error</string>
     <string name="text_success">Success</string>
     <string name="text_ok">OK</string>
+    <string name="text_retry">Retry</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_info">Info</string>
     <string name="are_you_sure">Are you sure?</string>

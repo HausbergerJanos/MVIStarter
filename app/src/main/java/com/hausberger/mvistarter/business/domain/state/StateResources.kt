@@ -1,5 +1,6 @@
 package com.hausberger.mvistarter.business.domain.state
 
+import android.content.Context
 import android.view.View
 
 data class StateMessage(val response: Response)
@@ -14,7 +15,14 @@ data class SimpleMessage(
     val messageCode: Int? = null,
     val messageRes: Int? = null,
     val description: String? = null
-)
+) {
+
+    fun getMessage(context: Context): String {
+        return messageRes?.let { safeMessageRes ->
+            context.getString(safeMessageRes)
+        } ?: ""
+    }
+}
 
 sealed class UIComponentType {
 
