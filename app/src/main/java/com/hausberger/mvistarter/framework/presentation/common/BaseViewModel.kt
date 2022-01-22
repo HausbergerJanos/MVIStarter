@@ -1,7 +1,5 @@
 package com.hausberger.mvistarter.framework.presentation.common
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.hausberger.mvistarter.R
 import com.hausberger.mvistarter.business.domain.state.*
@@ -9,50 +7,101 @@ import com.hausberger.mvistarter.util.printLogD
 import kotlinx.coroutines.flow.*
 
 abstract class BaseViewModel<ViewState> : ViewModel() {
-
+    // Observable ViewState
     private val _viewState by lazy { MutableStateFlow(initNewViewState()) }
     val viewState = _viewState.asStateFlow()
 
-    private val dataChannelManager: DataChannelManager<ViewState> =
-        object : DataChannelManager<ViewState>() {
-            override fun handleNewData(data: ViewState) {
-                this@BaseViewModel.handleNewData(data)
-            }
-        }
+    // Track progressBar visibility
+    lateinit var shouldDisplayProgressBar: StateFlow<Boolean>
 
-    val shouldDisplayProgressBar: LiveData<Boolean> = dataChannelManager.shouldDisplayProgressBar
+    // Track StateMessage which comes from DataState
+    lateinit var stateMessage: StateFlow<StateMessage?>
 
-    val stateMessage: StateFlow<StateMessage?>
-        get() = dataChannelManager.messageStack.stateMessage
+    // Responsible to track and control ViewState changes and notify all component about it
+    private lateinit var dataFlowManager: DataFlowManager<ViewState>
 
-    // FOR DEBUGGING
-    fun getMessageStackSize(): Int {
-        return dataChannelManager.messageStack.size
+    init {
+        setupDataFlowManager()
+        doAfterFlowManagerCreated()
     }
 
-    //fun setupChannel() = dataChannelManager.setupChannel()
+    /**
+     * Initialize an instance of [DataFlowManager] which will be notify our [ViewModel]
+     * about state changes
+     */
+    private fun setupDataFlowManager() {
+        dataFlowManager =
+            object : DataFlowManager<ViewState>() {
+                override fun handleNewData(data: ViewState) {
+                    // Notify child about ViewState changed
+                    this@BaseViewModel.handleNewData(data)
+                }
+            }
+    }
 
+    /**
+     * Called after [DataFlowManager] created. Prepare observable [stateMessage]
+     * and [shouldDisplayProgressBar] according to [DataFlowManager]
+     */
+    private fun doAfterFlowManagerCreated() {
+        shouldDisplayProgressBar = dataFlowManager.shouldDisplayProgressBar
+        stateMessage = dataFlowManager.messageStack.stateMessage
+    }
+
+    /**
+     * Handle ViewState changes
+     * @param ViewState The new [ViewState]
+     */
     abstract fun handleNewData(data: ViewState)
 
-    abstract fun setStateEvent(stateEvent: StateEvent)
-
+    /**
+     * Create a new instance of ViewState
+     */
     abstract fun initNewViewState(): ViewState
 
+    /**
+     * Sets the [StateEvent] which describes the state we want the ViewState to take
+     * @param stateEvent Desired state which will be trigger to perform action
+     */
+    abstract fun setStateEvent(stateEvent: StateEvent)
+
+    /**
+     * Launches the collection of [DataState] flow
+     *
+     * @param stateEvent The desired state
+     * @param dataStateFlow The [DataState] flow which will be collected
+     */
+    fun collectFlow(
+        stateEvent: StateEvent,
+        dataStateFlow: Flow<DataState<ViewState>?>
+    ) = dataFlowManager.collectFlow(stateEvent, dataStateFlow)
+
+    /**
+     * Creates a custom error [DataState] and emit it.
+     * @param stateEvent Actual [StateEvent]
+     * @param stateMessage Custom [StateMessage]
+     */
     fun emitStateMessageEvent(
         stateMessage: StateMessage,
         stateEvent: StateEvent
-    ) = flow {
+    ): Flow<DataState<ViewState>> = flow {
         emit(
-            DataState.error<ViewState>(
+            DataState.error(
                 response = stateMessage.response,
                 stateEvent = stateEvent
             )
         )
     }
 
-    fun emitInvalidStateEvent(stateEvent: StateEvent) = flow {
+    /**
+     * Emits an invalid [DataState] if action not defined for [StateEvent]
+     * @param stateEvent Actual [StateEvent] which is not handled
+     */
+    fun emitInvalidStateEvent(
+        stateEvent: StateEvent
+    ): Flow<DataState<ViewState>> = flow {
         emit(
-            DataState.error<ViewState>(
+            DataState.error(
                 response = Response(
                     message = SimpleMessage(
                         messageRes = R.string.invalid_state_event
@@ -65,29 +114,33 @@ abstract class BaseViewModel<ViewState> : ViewModel() {
         )
     }
 
-    fun launchJob(
-        stateEvent: StateEvent,
-        jobFunction: Flow<DataState<ViewState>?>
-    ) = dataChannelManager.launchJob(stateEvent, jobFunction)
-
+    /**
+     * Get current [ViewState]. If it is not exist yet initialize it
+     */
     fun getCurrentViewStateOrNew(): ViewState {
         return viewState.value ?: initNewViewState()
     }
 
+    /**
+     * Override [ViewState] value. It will notify all subscribers
+     */
     fun setViewState(viewState: ViewState) {
         _viewState.value = viewState
     }
 
-    fun clearStateMessage(index: Int = 0) {
-        printLogD("BaseViewModel", "clearStateMessage")
-        dataChannelManager.clearStateMessage(index)
+    fun getMessageStackSize(): Int {
+        return dataFlowManager.messageStack.size
     }
 
-    fun clearActiveStateEvents() = dataChannelManager.clearActiveStateEventCounter()
+    fun removeStateMessage(index: Int = 0) {
+        printLogD("BaseViewModel", "ClearStateMessage")
+        dataFlowManager.removeStateMessage(index)
+    }
 
-    fun clearAllStateMessages() = dataChannelManager.clearAllStateMessages()
-
-    fun printStateMessages() = dataChannelManager.printStateMessages()
-
-    fun cancelActiveJobs() = dataChannelManager.cancelJobs()
+    /**
+     * Cancels all running jobs
+     */
+    fun cancelJobs() {
+        dataFlowManager.cancelJobs()
+    }
 }

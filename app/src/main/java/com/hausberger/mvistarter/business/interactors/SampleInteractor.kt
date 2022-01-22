@@ -12,6 +12,7 @@ import com.hausberger.mvistarter.business.domain.state.MessageType.*
 import com.hausberger.mvistarter.framework.datasource.network.abstarction.SampleNetworkService
 import com.hausberger.mvistarter.framework.presentation.sample.state.SampleViewState
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import java.lang.AssertionError
 import javax.inject.Inject
@@ -117,6 +118,7 @@ constructor(
         stateEvent: StateEvent
     ): DataState<SampleViewState>? {
         val apiResult = safeApiCall(IO) {
+            delay(3000)
             sampleNetworkService.getSamples()
         }
 

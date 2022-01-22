@@ -53,14 +53,10 @@ class SampleAdapter(private val interaction: Interaction? = null) :
     }
 
     fun submitList(list: List<Sample>) {
-        val commitCallback = Runnable {
-            interaction?.restoreListPosition()
-        }
-        differ.submitList(list, commitCallback)
+        differ.submitList(list)
     }
 
     interface Interaction {
         fun onItemSelected(position: Int, item: Sample)
-        fun restoreListPosition()
     }
 }

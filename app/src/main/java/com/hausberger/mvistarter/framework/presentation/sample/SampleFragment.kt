@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.hausberger.mvistarter.R
@@ -23,6 +22,7 @@ import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
+
     private var currentBinding: FragmentSampleBinding? = null
     private val binding get() = currentBinding!!
 
@@ -30,11 +30,6 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
 
     private var sampleAdapter: SampleAdapter? = null
     private lateinit var uiController: UIController
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //viewModel.setupChannel()
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,18 +60,20 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
             }
         }
 
-        viewModel.shouldDisplayProgressBar.observe(viewLifecycleOwner, Observer { shouldDisplay ->
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.shouldDisplayProgressBar.collect { shouldDisplayProgressBar ->
 
-        })
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.stateMessage.collect { stateMessage ->
-                stateMessage?.let {
+                stateMessage?.let { safeStateMessage ->
                     uiController.onResponseReceived(
-                        response = stateMessage.response,
+                        response = safeStateMessage.response,
                         stateMessageCallback = object : StateMessageCallback {
                             override fun removeMessageFromStack() {
-                                viewModel.clearStateMessage()
+                                viewModel.removeStateMessage()
                             }
                         }
                     )
@@ -108,22 +105,8 @@ class SampleFragment : Fragment(R.layout.fragment_sample), Interaction {
         super.onPause()
 
         if (viewModel.getMessageStackSize() > 0) {
-            viewModel.clearStateMessage()
+            viewModel.removeStateMessage()
         }
-
-        saveLayoutManagerState()
-    }
-
-    override fun restoreListPosition() {
-//        viewModel.getLayoutManagerState()?.let { lmState ->
-//            binding.sampleRecyclerView.layoutManager?.onRestoreInstanceState(lmState)
-//        }
-    }
-
-    private fun saveLayoutManagerState() {
-//        binding.sampleRecyclerView.layoutManager?.onSaveInstanceState()?.let { lmState ->
-//            viewModel.setLayoutManagerState(lmState)
-//        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

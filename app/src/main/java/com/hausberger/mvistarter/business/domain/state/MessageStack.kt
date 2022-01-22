@@ -63,7 +63,6 @@ class MessageStack : ArrayList<StateMessage>() {
                 response = it.response
             )
         }
-
         _stateMessage.value =  stateMessage
     }
 }

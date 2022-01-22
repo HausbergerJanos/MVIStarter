@@ -1,10 +1,10 @@
 package com.hausberger.mvistarter.business.domain.state
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Keeps track of active StateEvents in DataChannelManager
+ * Keeps track of active StateEvents in DataFlowManager
  *
  * Keeps track of whether the progress bar should show or not based on a boolean
  * value in each StateEvent (shouldDisplayProgressBar)
@@ -13,16 +13,14 @@ class StateEventManager {
 
     private val activeStateEvents: HashMap<String, StateEvent> = HashMap()
 
-    private val _shouldDisplayProgressBar: MutableLiveData<Boolean> = MutableLiveData()
-
-    val shouldDisplayProgressBar: LiveData<Boolean>
-        get() = _shouldDisplayProgressBar
+    private val _shouldDisplayProgressBar by lazy { MutableStateFlow(false) }
+    val shouldDisplayProgressBar = _shouldDisplayProgressBar.asStateFlow()
 
     fun getActiveJobNames(): MutableSet<String> {
         return activeStateEvents.keys
     }
 
-    fun clearActiveStateEventCounter() {
+    fun clearActiveStateEvents() {
         activeStateEvents.clear()
         syncNumActiveStateEvents()
     }

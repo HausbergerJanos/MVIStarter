@@ -1,6 +1,7 @@
 package com.hausberger.mvistarter.framework.presentation.sample
 
 import com.hausberger.mvistarter.business.domain.model.Sample
+import com.hausberger.mvistarter.business.domain.state.DataFlowManager
 import com.hausberger.mvistarter.business.domain.state.DataState
 import com.hausberger.mvistarter.business.domain.state.StateEvent
 import com.hausberger.mvistarter.business.interactors.SampleInteractor
@@ -26,13 +27,13 @@ constructor(
         }
     }
 
+    /**
+     * According to [StateEvent] creates a [DataState] flow and it will be launched
+     * from the [DataFlowManager]
+     */
     override fun setStateEvent(stateEvent: StateEvent) {
-        val job: Flow<DataState<SampleViewState>?> = when (stateEvent) {
+        val dataStateFlow: Flow<DataState<SampleViewState>?> = when (stateEvent) {
             is FetchSampleEvent -> {
-                sampleInteractor.fetchSamples(stateEvent)
-            }
-
-            is FetchSampleEvent2 -> {
                 sampleInteractor.fetchSamples(stateEvent)
             }
 
@@ -41,7 +42,7 @@ constructor(
             }
         }
 
-        launchJob(stateEvent, job)
+        collectFlow(stateEvent, dataStateFlow)
     }
 
     override fun initNewViewState(): SampleViewState {

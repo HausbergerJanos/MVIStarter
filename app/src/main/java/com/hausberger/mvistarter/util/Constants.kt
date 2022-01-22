@@ -4,7 +4,7 @@ interface Constants {
 
     interface AppConstants {
         companion object {
-            const val TAG = "AppDebug" // Tag for logs
+            const val TAG = "SampleApp-->" // Tag for logs
             const val DEBUG = true // enable logging
             const val DATABASE_NAME = "app_database"
         }

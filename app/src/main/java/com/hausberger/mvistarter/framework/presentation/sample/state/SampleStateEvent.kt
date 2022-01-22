@@ -20,19 +20,4 @@ sealed class SampleStateEvent : StateEvent {
             return true
         }
     }
-
-    object FetchSampleEvent2 : SampleStateEvent() {
-
-        override fun errorInfoRes(): Int {
-            return R.string.sample_error
-        }
-
-        override fun eventName(): String {
-            return "FetchSampleEvent2"
-        }
-
-        override fun shouldDisplayProgressBar(): Boolean {
-            return true
-        }
-    }
 }
